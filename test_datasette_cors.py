@@ -40,7 +40,7 @@ async def test_datasette_cors_plugin_installed():
         (b"http://foo.com", None),
     ],
 )
-async def test_asgi_cors_two_hosts_and_a_wildcard(request_origin, expected_cors_header):
+async def test_asgi_cors_hosts(request_origin, expected_cors_header):
     instance = ApplicationCommunicator(
         Datasette(
             [],
