@@ -25,7 +25,7 @@ setup(
     entry_points={"datasette": ["cors = datasette_cors"]},
     install_requires=["asgi-cors~=0.3"],
     extras_require={
-        "test": ["datasette", "pytest", "pytest-asyncio", "asgiref~=3.1.2"]
+        "test": ["datasette~=0.29", "pytest", "pytest-asyncio", "asgiref~=3.1.2"]
     },
     tests_require=["datasette-cors[test]"],
 )
