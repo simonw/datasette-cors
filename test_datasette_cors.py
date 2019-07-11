@@ -26,7 +26,7 @@ async def test_datasette_cors_plugin_installed():
             "name": "datasette_cors",
             "static": False,
             "templates": False,
-            "version": "0.2",
+            "version": "0.3",
         }
     ] == json.loads(body["body"].decode("utf8"))
 
