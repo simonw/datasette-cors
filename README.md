@@ -7,7 +7,7 @@
 
 Datasette plugin for configuring CORS headers, based on https://github.com/simonw/asgi-cors
 
-You can use this plugin to allow JavaScript running on a whitelisted set of domains to make `fetch()` calls to the JSON API provided by your Datasette instance.
+You can use this plugin to allow JavaScript running on a allowlisted set of domains to make `fetch()` calls to the JSON API provided by your Datasette instance.
 
 ## Installation
 
@@ -17,7 +17,7 @@ You can use this plugin to allow JavaScript running on a whitelisted set of doma
 
 You need to add some configuration to your Datasette `metadata.json` file for this plugin to take effect.
 
-To whitelist specific domains, use this:
+To allowlist specific domains, use this:
 
 ```json
 {
@@ -29,7 +29,7 @@ To whitelist specific domains, use this:
 }
 ```
 
-You can also whitelist patterns like this:
+You can also allowlist patterns like this:
 
 ```json
 {
