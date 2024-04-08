@@ -1,34 +1,23 @@
-import json
-
+import httpx
 import pytest
-from asgiref.testing import ApplicationCommunicator
+from unittest.mock import ANY
 from datasette.app import Datasette
 
 
 @pytest.mark.asyncio
 async def test_datasette_cors_plugin_installed():
-    instance = ApplicationCommunicator(
-        Datasette([], memory=True).app(),
-        {
-            "type": "http",
-            "http_version": "1.0",
-            "method": "GET",
-            "path": "/-/plugins.json",
-        },
-    )
-    await instance.send_input({"type": "http.request"})
-    response_start = await instance.receive_output(1)
-    assert "http.response.start" == response_start["type"]
-    assert 200 == response_start["status"]
-    body = await instance.receive_output(1)
-    assert [
-        {
-            "name": "datasette_cors",
-            "static": False,
-            "templates": False,
-            "version": "0.3",
-        }
-    ] == json.loads(body["body"].decode("utf8"))
+    async with httpx.AsyncClient(app=Datasette([], memory=True).app()) as client:
+        response = await client.get("http://localhost/-/plugins.json")
+        assert response.status_code == 200
+        assert response.json() == [
+            {
+                "name": "datasette-cors",
+                "static": False,
+                "templates": False,
+                "version": ANY,
+                "hooks": ["asgi_wrapper"],
+            }
+        ]
 
 
 @pytest.mark.asyncio
@@ -36,28 +25,24 @@ async def test_datasette_cors_plugin_installed():
     "request_origin,expected_cors_header",
     [
         (None, None),
-        (b"http://example.com", b"http://example.com"),
-        (b"http://foo.com", None),
+        ("http://example.com", "http://example.com"),
+        ("http://foo.com", None),
     ],
 )
 async def test_asgi_cors_hosts(request_origin, expected_cors_header):
-    instance = ApplicationCommunicator(
-        Datasette(
+    headers = {}
+    if request_origin:
+        headers["Origin"] = request_origin
+
+    async with httpx.AsyncClient(
+        app=Datasette(
             [],
             memory=True,
             metadata={"plugins": {"datasette-cors": {"hosts": ["http://example.com"]}}},
-        ).app(),
-        {
-            "type": "http",
-            "http_version": "1.0",
-            "method": "GET",
-            "path": "/",
-            "headers": [[b"origin", request_origin]],
-        },
-    )
-    await instance.send_input({"type": "http.request"})
-    event = await instance.receive_output(1)
-    assert 200 == event["status"]
-    assert expected_cors_header == dict(event.get("headers") or []).get(
-        b"access-control-allow-origin"
-    )
+        ).app()
+    ) as client:
+        response = await client.get("http://localhost/", headers=headers)
+        assert response.status_code == 200
+        assert (
+            response.headers.get("access-control-allow-origin") == expected_cors_header
+        )
