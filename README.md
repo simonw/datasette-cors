@@ -1,8 +1,9 @@
 # datasette-cors
 
 [![PyPI](https://img.shields.io/pypi/v/datasette-cors.svg)](https://pypi.org/project/datasette-cors/)
-[![CircleCI](https://circleci.com/gh/simonw/datasette-cors.svg?style=svg)](https://circleci.com/gh/simonw/datasette-cors)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/simonw/datasette-cors/blob/master/LICENSE)
+[![Tests](https://github.com/simonw/datasette-cors/actions/workflows/test.yml/badge.svg)](https://github.com/simonw/datasette-cors/actions/workflows/test.yml)
+[![Changelog](https://img.shields.io/github/v/release/simonw/datasette-cors?include_prereleases&label=changelog)](https://github.com/simonw/datasette-cors/releases)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/simonw/datasette-cors/blob/main/LICENSE)
 
 Datasette plugin for configuring CORS headers, based on https://github.com/simonw/asgi-cors
 
