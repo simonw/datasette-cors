@@ -41,6 +41,57 @@ You can also whitelist patterns like this:
 }
 ```
 
+To allow all origins, use:
+
+```json
+{
+    "plugins": {
+        "datasette-cors": {
+            "allow_all": true
+        }
+    }
+}
+```
+
+You can specify allowed headers using the `headers` option:
+
+```json
+{
+    "plugins": {
+        "datasette-cors": {
+            "allow_all": true,
+            "headers": ["Authorization", "Content-Type"]
+        }
+    }
+}
+```
+
+To allow specific HTTP methods, use the `methods` option:
+
+```json
+{
+    "plugins": {
+        "datasette-cors": {
+            "allow_all": true,
+            "methods": ["GET", "POST", "OPTIONS"]
+        }
+    }
+}
+```
+
+You can set the `Access-Control-Max-Age` header using the `max_age` option:
+
+```json
+{
+    "plugins": {
+        "datasette-cors": {
+            "allow_all": true,
+            "max_age": 3600
+        }
+    }
+}
+```
+
 ## Testing it
 
 To test this plugin out, run it locally by saving one of the above examples as `metadata.json` and running this:

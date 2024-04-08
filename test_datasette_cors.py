@@ -46,3 +46,67 @@ async def test_asgi_cors_hosts(request_origin, expected_cors_header):
         assert (
             response.headers.get("access-control-allow-origin") == expected_cors_header
         )
+
+
+@pytest.mark.asyncio
+async def test_asgi_cors_headers():
+    async with httpx.AsyncClient(
+        app=Datasette(
+            [],
+            memory=True,
+            metadata={
+                "plugins": {
+                    "datasette-cors": {
+                        "allow_all": True,
+                        "headers": ["Authorization", "Content-Type"],
+                    }
+                }
+            },
+        ).app()
+    ) as client:
+        response = await client.get("http://localhost/")
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == "*"
+        assert (
+            response.headers["access-control-allow-headers"]
+            == "Authorization, Content-Type"
+        )
+
+
+@pytest.mark.asyncio
+async def test_asgi_cors_methods():
+    async with httpx.AsyncClient(
+        app=Datasette(
+            [],
+            memory=True,
+            metadata={
+                "plugins": {
+                    "datasette-cors": {
+                        "allow_all": True,
+                        "methods": ["GET", "POST", "OPTIONS"],
+                    }
+                }
+            },
+        ).app()
+    ) as client:
+        response = await client.get("http://localhost/")
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == "*"
+        assert response.headers["access-control-allow-methods"] == "GET, POST, OPTIONS"
+
+
+@pytest.mark.asyncio
+async def test_asgi_cors_max_age():
+    async with httpx.AsyncClient(
+        app=Datasette(
+            [],
+            memory=True,
+            metadata={
+                "plugins": {"datasette-cors": {"allow_all": True, "max_age": 3600}}
+            },
+        ).app()
+    ) as client:
+        response = await client.get("http://localhost/")
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == "*"
+        assert response.headers["access-control-max-age"] == "3600"
