@@ -1,7 +1,7 @@
 from setuptools import setup
 import os
 
-VERSION = "1.0"
+VERSION = "1.0.1"
 
 
 def get_long_description():
@@ -23,7 +23,7 @@ setup(
     version=VERSION,
     py_modules=["datasette_cors"],
     entry_points={"datasette": ["cors = datasette_cors"]},
-    install_requires=["asgi-cors>=1.0"],
+    install_requires=["asgi-cors>=1.0.1"],
     extras_require={"test": ["datasette", "pytest", "pytest-asyncio", "httpx"]},
     tests_require=["datasette-cors[test]"],
 )
