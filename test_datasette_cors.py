@@ -1,4 +1,3 @@
-import httpx
 import pytest
 from unittest.mock import ANY
 from datasette.app import Datasette
@@ -6,18 +5,18 @@ from datasette.app import Datasette
 
 @pytest.mark.asyncio
 async def test_datasette_cors_plugin_installed():
-    async with httpx.AsyncClient(app=Datasette([], memory=True).app()) as client:
-        response = await client.get("http://localhost/-/plugins.json")
-        assert response.status_code == 200
-        assert response.json() == [
-            {
-                "name": "datasette-cors",
-                "static": False,
-                "templates": False,
-                "version": ANY,
-                "hooks": ["asgi_wrapper"],
-            }
-        ]
+    ds = Datasette([], memory=True)
+    response = await ds.client.get("/-/plugins.json")
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "name": "datasette-cors",
+            "static": False,
+            "templates": False,
+            "version": ANY,
+            "hooks": ["asgi_wrapper"],
+        }
+    ]
 
 
 @pytest.mark.asyncio
@@ -34,79 +33,67 @@ async def test_asgi_cors_hosts(request_origin, expected_cors_header):
     if request_origin:
         headers["Origin"] = request_origin
 
-    async with httpx.AsyncClient(
-        app=Datasette(
-            [],
-            memory=True,
-            metadata={"plugins": {"datasette-cors": {"hosts": ["http://example.com"]}}},
-        ).app()
-    ) as client:
-        response = await client.get("http://localhost/", headers=headers)
-        assert response.status_code == 200
-        assert (
-            response.headers.get("access-control-allow-origin") == expected_cors_header
-        )
+    ds = Datasette(
+        [],
+        memory=True,
+        config={"plugins": {"datasette-cors": {"hosts": ["http://example.com"]}}},
+    )
+    response = await ds.client.get("/", headers=headers)
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == expected_cors_header
 
 
 @pytest.mark.asyncio
 async def test_asgi_cors_headers():
-    async with httpx.AsyncClient(
-        app=Datasette(
-            [],
-            memory=True,
-            metadata={
-                "plugins": {
-                    "datasette-cors": {
-                        "allow_all": True,
-                        "headers": ["Authorization", "Content-Type"],
-                    }
+    ds = Datasette(
+        [],
+        memory=True,
+        config={
+            "plugins": {
+                "datasette-cors": {
+                    "allow_all": True,
+                    "headers": ["Authorization", "Content-Type"],
                 }
-            },
-        ).app()
-    ) as client:
-        response = await client.get("http://localhost/")
-        assert response.status_code == 200
-        assert response.headers["access-control-allow-origin"] == "*"
-        assert (
-            response.headers["access-control-allow-headers"]
-            == "Authorization, Content-Type"
-        )
+            }
+        },
+    )
+    response = await ds.client.get("/")
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "*"
+    assert (
+        response.headers["access-control-allow-headers"]
+        == "Authorization, Content-Type"
+    )
 
 
 @pytest.mark.asyncio
 async def test_asgi_cors_methods():
-    async with httpx.AsyncClient(
-        app=Datasette(
-            [],
-            memory=True,
-            metadata={
-                "plugins": {
-                    "datasette-cors": {
-                        "allow_all": True,
-                        "methods": ["GET", "POST", "OPTIONS"],
-                    }
+    ds = Datasette(
+        [],
+        memory=True,
+        config={
+            "plugins": {
+                "datasette-cors": {
+                    "allow_all": True,
+                    "methods": ["GET", "POST", "OPTIONS"],
                 }
-            },
-        ).app()
-    ) as client:
-        response = await client.get("http://localhost/")
-        assert response.status_code == 200
-        assert response.headers["access-control-allow-origin"] == "*"
-        assert response.headers["access-control-allow-methods"] == "GET, POST, OPTIONS"
+            }
+        },
+    )
+    response = await ds.client.get("/")
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "*"
+    assert response.headers["access-control-allow-methods"] == "GET, POST, OPTIONS"
 
 
 @pytest.mark.asyncio
 async def test_asgi_cors_max_age():
-    async with httpx.AsyncClient(
-        app=Datasette(
-            [],
-            memory=True,
-            metadata={
-                "plugins": {"datasette-cors": {"allow_all": True, "max_age": 3600}}
-            },
-        ).app()
-    ) as client:
-        response = await client.get("http://localhost/")
-        assert response.status_code == 200
-        assert response.headers["access-control-allow-origin"] == "*"
-        assert response.headers["access-control-max-age"] == "3600"
+    ds = Datasette(
+        [],
+        memory=True,
+        config={"plugins": {"datasette-cors": {"allow_all": True, "max_age": 3600}}},
+    )
+    response = await ds.client.get("/")
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "*"
+    assert response.headers["access-control-max-age"] == "3600"
